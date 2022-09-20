@@ -280,7 +280,7 @@ fn create_proxied_request<B>(
 
 pub async fn call<'a, T: hyper::client::connect::Connect + Clone + Send + Sync + 'static>(
     client_ip: IpAddr,
-    forward_uri: &str,
+    forward_uri: hyper::Uri,
     mut request: Request<Body>,
     client: &'a Client<T>,
 ) -> Result<Response<Body>, ProxyError> {
@@ -296,7 +296,7 @@ pub async fn call<'a, T: hyper::client::connect::Connect + Clone + Send + Sync +
 
     let proxied_request = create_proxied_request(
         client_ip,
-        forward_uri,
+        &forward_uri.to_string(),
         request,
         request_upgrade_type.as_ref(),
     )?;
@@ -356,7 +356,7 @@ impl<T: hyper::client::connect::Connect + Clone + Send + Sync + 'static> Reverse
     pub async fn call(
         &self,
         client_ip: IpAddr,
-        forward_uri: &str,
+        forward_uri: hyper::Uri,
         request: Request<Body>,
     ) -> Result<Response<Body>, ProxyError> {
         call::<T>(client_ip, forward_uri, request, &self.client).await
